@@ -2,51 +2,47 @@
 #include <string>
 #include <cctype>
 
-char *curr_char;
-
-float Factor(){
+float Factor(std::string::iterator &curr_char){
     std::string str;
-    while(isdigit(*curr_char)){
+    while(isdigit(*curr_char)){ // get int
         str += *curr_char;
-        *curr_char++;
-        if (*curr_char == '.') {
-        	str += curr_char;
-            *curr_char++;
+        curr_char++;
+        if (*curr_char == '.') { // get float
+        	str += *curr_char;
+            curr_char++;
             while ((*curr_char != '\0') && (std::isdigit(*curr_char))) {
-            	str += curr_char;
-                *curr_char++;
+            	str += *curr_char;
+                curr_char++;
             }
-    	}
+    	}else{ std::runtime_error("Ошибка в выражении!"); }
     }
     return stof(str);
 }
 
-float Term(char* expr){
-    float res = Factor();
+// If we have * or / parse they first
+float Term(std::string::iterator &curr_char){
+    float res = Factor(curr_char);
     while(*curr_char == '*' || *curr_char == '/'){
-        char op = *curr_char++;
-        if(op == '*'){ res *= Factor(); }
-        else{ res /= Factor(); }
+        char op = *(curr_char++);
+        if(op == '*'){ res *= Factor(curr_char); }
+        else{ res /= Factor(curr_char); }
     }
-   return res;
+    return res;
 }
 
-float Expr(char* expr){
-    float res = Term(expr);
+// // If we have - or + parse they second
+float Expr(std::string::iterator &curr_char){
+    float res = Term(curr_char);
     while(*curr_char == '+' || *curr_char == '-'){
-        char op = *curr_char++;
-        if(op == '+'){ res += Term(expr); }
-        else{ res -= Term(expr); }
+        char op = *(curr_char++);
+        if(op == '+'){ res += Term(curr_char); }
+        else{ res -= Term(curr_char); }
     }
     return res;
 }
 
 int main(){
-    for(;;){
-        char expr[50] = "";
-        printf(">> ");
-        curr_char = expr;
-        scanf("%s", &expr);
-        std::cout << Expr(curr_char) << std::endl;
-    }
+    std::string expr = "5.8+6.29";
+    std::string::iterator it = expr.begin();
+    std::cout << Expr(it) << std::endl;
 }
